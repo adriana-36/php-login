@@ -5,10 +5,15 @@ require 'database.php';
 $user = null;
 
 if (isset($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare('SELECT id, email FROM users WHERE id = :id');
-    $stmt->bindParam(':id', $_SESSION['user_id']);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $sql = "SELECT id, email FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+    }
 }
 ?>
 

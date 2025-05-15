@@ -1,18 +1,12 @@
 <?php
-$host = 'localhost';
-$db = 'php_login_database';
-$user = 'root';
-$pass = '';
-$charset = 'utf8mb4';
+$host = "localhost";
+$user = "root";
+$password = "";
+$dbname = "php_login_database"; // tu nombre real de base de datos
 
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-];
+$conn = new mysqli($host, $user, $password, $dbname);
 
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (PDOException $e) {
-    die('Database connection failed: ' . $e->getMessage());
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
 }
 ?>

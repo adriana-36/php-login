@@ -3,18 +3,25 @@ require "database.php";
 
 $message = '';
 
-if (!empty($_POST['email']) && !empty($_POST['password'])) {
-  $sql = "INSERT INTO users (email, password) VALUES (:email, :password)";
-  $stmt = $conn->prepare($sql);
-  $stmt->bindParam(':email', $_POST['email']);
-  $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-  $stmt->bindParam(':password', $password);
+if (!empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['confirm_password'])) {
+    if ($_POST['password'] !== $_POST['confirm_password']) {
+        $message = 'Las contraseñas no coinciden.';
+    } else {
+        $sql = "INSERT INTO users (email, password) VALUES (?, ?)";
+        $stmt = $conn->prepare($sql);
+        if ($stmt === false) {
+            die("Error en la preparación de la consulta: " . $conn->error);
+        }
+        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $stmt->bind_param("ss", $_POST['email'], $password);
 
-  if ($stmt->execute()) {
-    $message = '¡Usuario creado exitosamente!';
-  } else {
-    $message = 'Lo sentimos, ocurrió un error al crear su cuenta.';
-  }
+        if ($stmt->execute()) {
+            $message = '¡Usuario creado exitosamente!';
+        } else {
+            $message = 'Lo sentimos, ocurrió un error al crear su cuenta.';
+        }
+        $stmt->close();
+    }
 }
 ?>
 
@@ -31,7 +38,7 @@ if (!empty($_POST['email']) && !empty($_POST['password'])) {
   <h1>Registrarse</h1>
 
   <?php if (!empty($message)): ?>
-    <p class="message"><?= $message ?></p>
+    <p class="message"><?= htmlspecialchars($message) ?></p>
   <?php endif; ?>
 
   <form action="signup.php" method="POST">
